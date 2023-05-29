@@ -1,0 +1,70 @@
+GCDInterface.java
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+public interface GCDInterface extends Remote {
+    int calculateGCD(int a, int b) throws RemoteException;
+}
+
+
+GCDServer.java
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+
+public class GCDServer extends UnicastRemoteObject implements GCDInterface {
+
+    public GCDServer() throws RemoteException {
+        super();
+    }
+
+    @Override
+    public int calculateGCD(int a, int b) throws RemoteException {
+        if (b == 0) {
+            return a;
+        } else {
+            return calculateGCD(b, a % b);
+        }
+    }
+
+    public static void main(String[] args) {
+        try {
+            GCDServer server = new GCDServer();
+            // Bind the server object to the RMI registry
+            java.rmi.registry.Registry registry = java.rmi.registry.LocateRegistry.createRegistry(1099);
+            registry.rebind("GCDServer", server);
+            System.out.println("GCDServer is running...");
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
+
+
+GCDClint.java
+import java.rmi.Naming;
+import java.util.Scanner;
+
+public class GCDClient {
+
+    public static void main(String[] args) {
+        try {
+            // Get user input for the numbers
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Enter the first number: ");
+            int number1 = scanner.nextInt();
+            System.out.print("Enter the second number: ");
+            int number2 = scanner.nextInt();
+
+            // Lookup the remote server object
+            GCDInterface gcdServer = (GCDInterface) Naming.lookup("rmi://localhost/GCDServer");
+
+            // Call the remote method
+            int result = gcdServer.calculateGCD(number1, number2);
+            System.out.println("GCD: " + result);
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
