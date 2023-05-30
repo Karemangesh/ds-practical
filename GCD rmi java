@@ -41,7 +41,7 @@ public class GCDServer extends UnicastRemoteObject implements GCDInterface {
 }
 
 
-GCDClint.java
+GCDClient.java
 import java.rmi.Naming;
 import java.util.Scanner;
 
